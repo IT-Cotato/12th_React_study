@@ -243,7 +243,7 @@ export default function Button(props: {
 
 ---
 
-### 4) 이벤트 핸들러를 props로 전달하기
+### 4) 이벤트 핸들러를 props로 전달
 
 **App.tsx**
 
