@@ -40,8 +40,6 @@ export default function App() {
 }
 ```
 
-````
-
 - 배열: 요소 각각 평가 → 값 그대로 출력
 - 객체: React는 표현식으로 객체 출력 불가 → `JSON.stringify` 사용
 - 함수: `toString()` 메서드로 문자열 변환
@@ -115,7 +113,6 @@ export default function User(props: { name: string; age: number }) {
 - React 타입으로 지정 필요
 
 - **ReactElement**: JSX 요소만 허용
-
 - **ReactNode (추천)**: 문자열, 숫자, null, undefined, JSX 요소까지 전부 허용
 
 ---
@@ -205,9 +202,6 @@ export default function Button() {
 
 ### 3) 이벤트 핸들러와 props
 
-- children: 콘텐츠로 사용
-- props: 속성이나 다른 로직에 활용
-
 **App.tsx**
 
 ```tsx
@@ -239,11 +233,9 @@ export default function Button(props: {
 }
 ```
 
-- 비구조 할당으로 더 깔끔하게 작성 가능
-
 ---
 
-### 4) 이벤트 핸들러를 props로 전달
+### 4) 이벤트 핸들러를 props로 전달하기
 
 **App.tsx**
 
@@ -292,10 +284,6 @@ export default function Button({
 
 ## 03. 이벤트 객체
 
-- 이벤트 발생 시 브라우저가 자동 생성
-- 이벤트 대상, 키보드 값, 마우스 좌표 등 포함
-- React에서는 **SyntheticEvent(합성 이벤트)** 제공
-
 ```tsx
 export default function Button() {
   const handleClick = (
@@ -322,18 +310,17 @@ export default function Button() {
 }
 ```
 
-- 매개변수를 전달할 경우 이벤트 객체도 명시적으로 넘겨야 함
+- 이벤트 발생 시 브라우저가 자동 생성
+- React에서는 원본 DOM 이벤트를 감싼 **SyntheticEvent** 제공
+- 매개변수를 같이 전달할 경우 이벤트 객체도 명시적으로 넘겨야 함
 
 ---
 
 ## 04. 이벤트 전파
 
 - 이벤트 발생 시 DOM을 따라 전달되는 과정
-
 - 단계: **캡쳐링 → 타깃 → 버블링**
-
 - 버블링: 타깃에서 시작해 상위 요소로 올라감
-
 - 캡쳐링: 최상위 요소에서 타깃까지 내려감
 
 ---
@@ -379,4 +366,3 @@ export default function Button({
   );
 }
 ```
-````
