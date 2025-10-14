@@ -11,9 +11,9 @@
 
 > React Hook: 함수형 컴포넌트에서 상태 관리, 생명 주기 제어, 부가 기능을 사용할 수 있게 도와주는 기능
 
-\```tsx
+```tsx
 const [state, setState] = useState<Type>(initialState);
-\```
+```
 
 | 구분           | 설명                       | 예시                             |
 | -------------- | -------------------------- | -------------------------------- |
@@ -30,31 +30,30 @@ const [state, setState] = useState<Type>(initialState);
 
 ### 예제: 상태 정의하기
 
-\```tsx
+```tsx
 import { useState } from "react";
 
 export default function App() {
-const [name, setName] = useState("jeongbam");
-const [age, setAge] = useState(22);
-const [gender, setGender] = useState("female");
+  const [name, setName] = useState("jeongbam");
+  const [age, setAge] = useState(22);
+  const [gender, setGender] = useState("female");
 
-const handleUpdateProfile = () => {
-setName("jeongbam");
-setAge(22);
-setGender("female");
-};
+  const handleUpdateProfile = () => {
+    setName("jeongbam");
+    setAge(22);
+    setGender("female");
+  };
 
-return (
-<>
-
-<p>name: {name}</p>
-<p>age: {age}</p>
-<p>gender: {gender}</p>
-<button onClick={handleUpdateProfile}>Update Profile</button>
-</>
-);
+  return (
+    <>
+      <p>name: {name}</p>
+      <p>age: {age}</p>
+      <p>gender: {gender}</p>
+      <button onClick={handleUpdateProfile}>Update Profile</button>
+    </>
+  );
 }
-\```
+```
 
 ---
 
@@ -65,9 +64,9 @@ return (
 - 상태를 변경할 때는 `setState` 함수를 사용한다.
 - 함수형 업데이트(Function Update)는 상태 변경 함수의 인수로 함수를 전달하는 방식이다.
 
-\```tsx
+```tsx
 setState((state) => state + 1);
-\```
+```
 
 > `state`는 항상 최신 상태 값을 보장한다.
 
@@ -78,27 +77,26 @@ setState((state) => state + 1);
 
 ### 예제: 카운터 앱 만들기
 
-\```tsx
+```tsx
 import { useState } from "react";
 
 export default function App() {
-const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
 
-const handleIncrement = () => setCount((count) => count + 1);
-const handleDecrement = () => setCount((count) => count - 1);
-const handleReset = () => setCount(0);
+  const handleIncrement = () => setCount((count) => count + 1);
+  const handleDecrement = () => setCount((count) => count - 1);
+  const handleReset = () => setCount(0);
 
-return (
-<>
-
-<h1>count: {count}</h1>
-<button onClick={handleIncrement}>Increment</button>
-<button onClick={handleDecrement}>Decrement</button>
-<button onClick={handleReset}>Reset</button>
-</>
-);
+  return (
+    <>
+      <h1>count: {count}</h1>
+      <button onClick={handleIncrement}>Increment</button>
+      <button onClick={handleDecrement}>Decrement</button>
+      <button onClick={handleReset}>Reset</button>
+    </>
+  );
 }
-\```
+```
 
 **목표**
 
@@ -132,9 +130,9 @@ return (
 
 ### 1) 개념
 
-\```tsx
+```tsx
 const [state, dispatch] = useReducer<Type>(reducer, initialState);
-\```
+```
 
 | 구성요소       | 설명                                  |
 | -------------- | ------------------------------------- |
@@ -153,74 +151,74 @@ const [state, dispatch] = useReducer<Type>(reducer, initialState);
 
 #### (1) `components/Count.tsx`
 
-\```tsx
+```tsx
 import { useReducer } from "react";
 import CountButton from "./CountButton";
 import CountDisplay from "./CountDisplay";
 import counterReducer from "../reducer/counterReducer";
 
 export default function Count() {
-const [count, countDispatch] = useReducer(counterReducer, 0);
-return (
-<>
-<CountDisplay count={count} />
-<CountButton countDispatch={countDispatch} />
-</>
-);
+  const [count, countDispatch] = useReducer(counterReducer, 0);
+  return (
+    <>
+      <CountDisplay count={count} />
+      <CountButton countDispatch={countDispatch} />
+    </>
+  );
 }
-\```
+```
 
 #### (2) `components/CountButton.tsx`
 
-\```tsx
+```tsx
 import { ActionDispatch } from "react";
 
 export default function CountButton({
-countDispatch,
+  countDispatch,
 }: {
-countDispatch: ActionDispatch<[action: { type: string }]>;
+  countDispatch: ActionDispatch<[action: { type: string }]>;
 }) {
-return (
-<>
-<button onClick={() => countDispatch({ type: "INCREMENT" })}>
-Increment
-</button>
-<button onClick={() => countDispatch({ type: "DECREMENT" })}>
-Decrement
-</button>
-<button onClick={() => countDispatch({ type: "RESET" })}>Reset</button>
-</>
-);
+  return (
+    <>
+      <button onClick={() => countDispatch({ type: "INCREMENT" })}>
+        Increment
+      </button>
+      <button onClick={() => countDispatch({ type: "DECREMENT" })}>
+        Decrement
+      </button>
+      <button onClick={() => countDispatch({ type: "RESET" })}>Reset</button>
+    </>
+  );
 }
-\```
+```
 
 #### (3) `components/CountDisplay.tsx`
 
-\```tsx
+```tsx
 export default function CountDisplay({ count }: { count: number }) {
-return <h1>{count}</h1>;
+  return <h1>{count}</h1>;
 }
-\```
+```
 
 #### (4) `reducer/counterReducer.tsx`
 
-\```tsx
+```tsx
 export default function counterReducer(
-count: number,
-action: { type: string }
+  count: number,
+  action: { type: string }
 ) {
-switch (action.type) {
-case "INCREMENT":
-return count + 1;
-case "DECREMENT":
-return count - 1;
-case "RESET":
-return 0;
-default:
-return count;
+  switch (action.type) {
+    case "INCREMENT":
+      return count + 1;
+    case "DECREMENT":
+      return count - 1;
+    case "RESET":
+      return 0;
+    default:
+      return count;
+  }
 }
-}
-\```
+```
 
 ---
 
@@ -257,19 +255,18 @@ return count;
 - `map`은 기존 배열을 순회하며 새로운 배열을 만드는 표준 메서드.
 - 선언적이며 JSX와 결합하기 쉬워 React에서 가장 권장되는 반복 렌더링 방식.
 
-\```tsx
+```tsx
 // 예시: map으로 리스트 렌더링
 function List({ items }: { items: string[] }) {
-return (
-
-<ul>
-{items.map((item) => (
-<li key={item}>{item}</li>
-))}
-</ul>
-);
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
 }
-\```
+```
 
 ### 2-2) (미션) map 메서드를 활용한 리스트 렌더링
 
@@ -290,18 +287,17 @@ return (
 - React Fragment(`<>...</>`)로 여러 엘리먼트를 한 번에 묶어 반환 가능.
 - 상위에서 받은 props를 조건으로 삼아 분기 처리 가능.
 
-\```tsx
+```tsx
 function Panel({ isOpen }: { isOpen: boolean }) {
-if (!isOpen) return null;
-return (
-<>
-
-<h2>Title</h2>
-<p>Content</p>
-</>
-);
+  if (!isOpen) return null;
+  return (
+    <>
+      <h2>Title</h2>
+      <p>Content</p>
+    </>
+  );
 }
-\```
+```
 
 #### (미션) 로그인 상태에 따른 화면 렌더링
 
@@ -312,20 +308,24 @@ return (
 - 특정 단일 값에 대한 다중 분기가 반복될 때 가독성을 높이기 위해 사용.
 - if 체인이 길어질 때 대체 수단으로 유용.
 
-\```tsx
-function StatusView({ status }: { status: "idle" | "loading" | "success" | "error" }) {
-switch (status) {
-case "loading":
-return <p>Loading...</p>;
-case "success":
-return <p>Done</p>;
-case "error":
-return <p>Error</p>;
-default:
-return <p>Idle</p>;
+```tsx
+function StatusView({
+  status,
+}: {
+  status: "idle" | "loading" | "success" | "error";
+}) {
+  switch (status) {
+    case "loading":
+      return <p>Loading...</p>;
+    case "success":
+      return <p>Done</p>;
+    case "error":
+      return <p>Error</p>;
+    default:
+      return <p>Idle</p>;
+  }
 }
-}
-\```
+```
 
 #### (미션) 신호등 색상에 따른 화면 렌더링
 
@@ -336,11 +336,11 @@ return <p>Idle</p>;
 - 하나의 return 문 안에서 인라인으로 조건부 렌더링을 처리할 때 사용.
 - 간단한 2분기 표현에 적합하며 과도한 중첩은 지양.
 
-\```tsx
+```tsx
 function Greeting({ isLoggedIn }: { isLoggedIn: boolean }) {
-return <h1>{isLoggedIn ? "Welcome" : "Please sign in"}</h1>;
+  return <h1>{isLoggedIn ? "Welcome" : "Please sign in"}</h1>;
 }
-\```
+```
 
 #### (미션) 삼항 연산자를 활용한 조건부 렌더링
 
@@ -371,10 +371,10 @@ return <>{show && <div className="notice">New notice</div>}</>;
 - 인덱스를 key로 사용하는 것은 데이터 추가/삭제/정렬 시 재조정 문제를 유발하므로 지양.
 - 데이터의 안정적인 식별자(예: id)를 key로 사용.
 
-\```tsx
+```tsx
 // 권장: 안정적인 식별자를 key로 사용
-items.map((item) => <Row key={item.id} item={item} />)
-\```
+items.map((item) => <Row key={item.id} item={item} />);
+```
 
 ### 2) key 속성의 유효 범위
 
@@ -390,15 +390,14 @@ items.map((item) => <Row key={item.id} item={item} />)
 - 배열에서 콜백 조건을 만족하는 요소만 걸러 새로운 배열을 만드는 표준 메서드.
 - 렌더링 전에 데이터 전처리(예: 특정 카테고리만 노출)에 자주 사용되며, `map`과 조합해 사용.
 
-\```tsx
+```tsx
 // 예시: vegetable 카테고리만 노출
 const vegetables = items.filter((v) => v.category === "vegetable");
 return (
-
   <ul>
     {vegetables.map((v) => (
       <li key={v.id}>{v.name}</li>
     ))}
   </ul>
 );
-\```
+```
