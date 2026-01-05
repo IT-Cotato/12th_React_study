@@ -1,0 +1,511 @@
+### useId
+
+- [ ]  사과
+
+이런 식으로 있을때, 꼭 체크박스 자체를 클릭하지 않아도(텍스트를 클릭해도) 체크박스가 클릭되게 만드는 법
+
+```tsx
+    //Checkbox.tsx
+    <div>
+      <input type="checkbox" id="apple"/>
+      <label htmlFor="apple">사과</label>
+    </div>
+```
+
+htmlFor 속성과 id의 속성 값이 서로 매칭되면서 값이 일치한 요소끼리는 서로 참조관계 형성됨
+
+근데 이렇게 하면 체크박스 컴포넌트를 2회 이상 불러오게 되면 2번째 불러온 컴포넌트부터는 첫번째 컴포넌트랑 속성값이 겹치게 되면서 작동 안되는 문제 발생함
+
+이 문제 해결을 위해 react 18에서 새롭게 추가된 고유한 id 값을 만들기 위한 usedId 훅
+
+이렇게 사용하면 고유한 아이디 값 생성
+
+```tsx
+import { useId } from "react";
+
+export default function Checkbox() {
+  const uuid = useId();
+  return (
+    <div>
+      <input type="checkbox" id={uuid} />
+      <label htmlFor={uuid}>사과</label>
+    </div>
+  );
+}
+```
+
+### useEffect 이론
+
+컴포넌트의 주된 목적: 컴포넌트에서 반환하는 JSX요소를 바탕으로 화면을 렌더링하는 것
+
+하지만 컴포넌트는 렌더링 외에도 많은 일을 함 (ex. api 통신, 로컬 또는 세션 스토리 등)
+
+React에서는 화면 렌더링을 제외한 다른 작업들을 모두 Side Effect라고 부름
+
+Side Effect: 컴포넌트가 JSX를 렌더링 하는 것을 제외한 모든 부수적인 행동
+
+사이드 이펙트를 수행하기 위해 useEffect 훅 사용함
+
+```tsx
+useEffect(effect함수, 의존성배열([]))
+
+//의존성 배열에 따라 effect함수가 호출되는 구조
+```
+
+useEffect 훅이 이펙트 함수를 호출하는 상황
+
+1. 컴포넌트가 생성될 때
+2. 컴포넌트가 삭제될 때
+3. 컴포넌트의 상태가 업데이트 될 때
+
+### useEffect 실습
+
+```tsx
+import { useEffect, useState } from "react";
+
+export default function Count() {
+  const [count, setCount] = useState(0);
+
+  //컴포넌트가 생성될 때만 호출됨
+  useEffect(() => {
+    console.log("Count 컴포넌트 생성!");
+
+    //컴포넌트가 삭제될때 호출됨(effect함수의 콜백 함수)
+    return () => {
+      console.log("Count 컴포넌트 삭제!");
+    };
+  }, []);
+
+  //컴포넌트 상태 변경되었을때 호출되는 함수, count값이 변경되었을 때만 호출됨, 
+  // 감시하고 싶은 상태가 여려개라면 ,로 더 쓰기 가능
+  // 의존성 배열만 다르다면 유저이펙트를 연속해서 써도 된다(이펙트 함수가 호출되는 시점만 다르게 하면)
+  useEffect(() => {
+    console.log("Count Change :" + count);
+  }, [count]);
+
+  return (
+    <>
+      <h1>Count: {count} </h1>
+      <button onClick={() => setCount((count) => count + 1)}>증가</button>
+    </>
+  );
+}
+```
+
+### 스톱워치
+
+```tsx
+import { Pause, Play, RotateCcw } from "lucide-react";
+import { useState } from "react";
+
+export default function Stopwatch() {
+  const [time, setTime] = useState(0); // ms
+  const [isRunning, setIsRunning] = useState(false);
+
+  const formatTime = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const milliseconds = Math.floor((ms % 1000) / 10);
+
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}.${milliseconds.toString().padStart(2, "0")}`;
+  };
+
+  const handelReset = () => {
+     setIsRunning(false);
+     setTime(0);
+  };
+
+//setInterval 함수로 0.1초마다 반복
+  useEffect(()=> {
+    let intervalId: number;
+    if(isRunning) {
+      intervalId = setInterval(()=> {
+        setTime((time) => time + 10);
+      }, 10);
+    }
+
+    return () => {
+      if(intervalId) clearInterval(intervalId);
+    };
+  , [isRunning]);
+
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="flex flex-col items-center justify-center space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+        <div className="text-5xl font-mono font-semibold text-gray-800 dark:text-white">
+          {formatTime(0)}
+        </div>
+
+        <div className="flex space-x-4">
+          {/* 시작중 - "bg-red-500 hover:bg-red-600" */}
+          {/* 정지중 - "bg-green-500 hover:bg-green-600" */}
+          
+          //twMerge 뒤에꺼 우선 적용
+          <button
+            className={twMerge(`p-3 rounded-full transition-colors bg-green-500 hover:bg-green-600 text-white`,
+              isRunning && "bg-red-500 hover:bg-red-600"
+            )}
+          >
+            {/* 시작버튼 <Play size={24} /> */}
+            {/* 정지버튼  <Pause size={24} /> */}
+            {isRunning ? <Pause size={24} /> : <Play size={24} />}
+          </button>
+
+          <button className="p-3 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+          onClick={handelReset}>
+            <RotateCcw size={24} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+```
+
+### 할일 관리 앱(useEffect)
+
+```tsx
+import { useState } from "react";
+import TodoEditor from "./TodoEditor";
+import TodoHeader from "./TodoHeader";
+import TodoList from "./TodoList";
+
+export default function Todo() {
+  const [todos, setTodos] = useState<Todo[]>(
+    JSON.parse(localStorage.getItem("todos") || "[]")
+  );
+  const addTodo = (text: string) => {
+    setTodos((todos) => [
+      ...todos,
+      {
+        id: Date.now(),
+        text,
+        completed: false,
+      },
+    ]);
+  };
+  const toggleTodo = (id: number) => {
+    setTodos((todos) =>
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+  const deleteTodo = (id: number) => {
+    setTodos((todos) => todos.filter((todo) => todo.id !== id));
+  };
+  const modifyTodo = (id: number, text: string) => {
+    setTodos((todos) =>
+      todos.map((todo) => (todo.id === id ? { ...todo, text } : todo))
+    );
+  };
+
+//useEffect로 상태값 변할 때마다 로컬 스토리지에 저장
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  return (
+    <>
+      <div className="todo">
+        <TodoHeader />
+        {/* 할 일 등록  */}
+        <TodoEditor addTodo={addTodo} />
+        {/* 할 일 목록  */}
+        <TodoList
+          todos={todos}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+          modifyTodo={modifyTodo}
+        />
+      </div>
+    </>
+  );
+}
+
+```
+
+### 컴포넌트 리렌더링 조건
+
+React는 처음 웹 브라우저에 컴포넌트들이 렌더링 되고 난다면 특별한 조건을 만족하지 않았을때는 다시 렌더링 되지 않음.
+
+리렌더링이 일어나는 3가지 경우
+
+1. 컴포넌트의 정의된 상태가 변경되었을 때
+2. 컴포넌트로 전달하는 props가 변경되었을 때
+3. 부모 컴포넌트가 리렌더링 되었을 때
+
+![image.png](attachment:8d7156a9-7200-4485-8099-2106b166a104:9f2bead8-951c-42d6-ba4a-c4f171fc6e9f.png)
+
+### React.Memo
+
+자식 컴포넌트는 변경된 props나 상태가 없어도 부모 컴포넌트가 리렌더링이 되는 이유 하나만으로 리렌더링 됨
+
+>불필요한 리렌더링, 성능 저하로 이어질 수도 있음
+
+>해결방법) React.Memo 사용하기
+
+`React.Memo`
+
+함수형 컴포넌트를 메모이제이션하여 동일한 props로 다시 렌더링 될 경우, 이전 결과를 재사용하게 함
+
+컴포넌트 자체를 메모리에 저장해두고 이후 동일한 props로 렌더링 요청이 들어오면 컴포넌트 함수를 다시 실행하지 않고 이전에 렌더링된 결과를 그대로 반환함
+
+컴포넌트 트리에서 하위 컴포넌트가 많을수록 성능에 큰 이점
+
+```tsx
+import ChildB from "./ChildB";
+import React from "react";
+
+export default React.memo(function ChildA() {
+  console.log("ChildA");
+  return (
+    <>
+      <h1>ChildA Component</h1>
+      <ChildB />
+    </>
+  );
+});
+
+```
+
+이제 app 컴포넌트가 리렌더링 되어도 props가 동일하다면 childA는 리렌더링 되지 않음,
+
+B,C도 리렌더링 되지 않음
+
+### React.memo가 풀리는 순간
+
+리액트 메모이제이션이 적용되지 않는 예외적인 케이스
+
+1. React.memo가 사용되어져 있는 컴포넌트 자체의 상태가 변경된다던가
+2. 해당 컴포넌트로 전달되는 props의 값이 변경되는 경우
+
+1의 경우, 상태를 부모 컴포넌트에서 정의후, props로 넘겨주면(고정값) 자식 컴포넌트에서 메모이제이션을 걸었을 경우, 부모 컴포넌트를 리렌더링해도 자식에서는 일어나지 않음
+
+고정값인 경우에만 가능, 고정값이 아니라면 2의 경우에 해당되어 자식에서 메모이제이션을 걸어도 풀리게 됨
+
+### useCallback
+
+```tsx
+//App.tsx
+import { useState } from "react";
+import ChildA from "./components/ChildA";
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  const increment = () => {
+    setCount((count) => count + 1);
+  };
+  return (
+    <>
+      <h1>count: {count}</h1>
+      <button onClick={() => setCount((count) => count + 1)}>증가</button>
+      <ChildA increment={increment} />
+    </>
+  );
+}
+
+//ChildA.tsx
+import ChildB from "./ChildB";
+import React from "react";
+
+export default React.memo(function ChildA({
+  increment,
+}: {
+  increment: () => void;
+}) {
+  console.log("ChildA");
+  return (
+    <>
+      <h1>ChildA Component</h1>
+      <ChildB />
+    </>
+  );
+});
+```
+
+childA로 prop로 상태값이 아니라 상태값을 변경할 수 있는 함수를 전달해서 
+
+childA는 리렌더링이 안될 것 같지만 메모이제이션이 풀리고 리렌더링 됨
+
+이유) increment라는 프로퍼티 값이 변경되어서
+
+앱 컴포넌트가 리렌더링 되면서 increment함수가 다시 정의됨
+
+함수는 참조 자료형이라 함수가 다시 정의되면 참조 값인 increment가 바뀌게 됨
+
+childA 입장에서는 계속 새로운 값이 전달된다고 받아들이게 됨
+
+그래서 이렇게 실제로는 변경되는 게 아닌데 다시 정의되는 경우,
+
+이걸 막기 위해 쓰는게 리액트 훅 useCallback
+
+```tsx
+import { useState } from "react";
+import ChildA from "./components/ChildA";
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  const increment = useCallback(() => {
+    setCount((count) => count + 1);
+  }, []);
+  
+  //의존성 배열을 빈 배열로 하면 
+  //컴포넌트가 생성될 때 한번만 메모리에 저장되고 그 이후부터는 계속 메모리에 저장된 값을 가져옴
+  //의존성 배열에 상태값을 넣으면 그 값이 변경될 때마다 함수가 메모이제이션 된다
+  
+  return (
+    <>
+      <h1>count: {count}</h1>
+      <button onClick={() => setCount((count) => count + 1)}>증가</button>
+      <ChildA increment={increment} />
+    </>
+  );
+}
+```
+
+useCallback함수에 의해서 increment함수는 메모이제이션 된거고 의존성 배열에 있는 값이 직접적으로 변경된게 아니라면 Increment는 항상  메모리에 저장된 값을 가져와서 쓴다!
+
+### useMemo
+
+react에서 메모이제이션 하는 또 다른 방법
+
+useMemo hook
+
+react memo 함수는 컴포넌트를 메모이제이션,
+
+useCallback 훅은 함수를 메모이제이션,
+
+useMemoHook은 값을 메모이제이션 할때 사용함
+
+ 
+
+```tsx
+import { useState, useMemo } from "react";
+
+const initialItems = new Array(29_999_999).fill(0).map((_, i) => {
+  return {
+    id: i,
+    selected: i === 29_999_998,
+  };
+});
+
+export default function App() {
+  const [count, setCount] = useState(0);
+
+  // 불필요한 연산을 만들어준 것
+  // 3000만개의 배열 데이터를 렌더링 마다 재생성하고 있음
+  const selectItems = useMemo(
+    () => initialItems.find((item) => item.selected),
+    []
+  );
+  return (
+    <>
+      <h1>Count: {count}</h1>
+      <button onClick={() => setCount((prevCount) => prevCount + 1)}>
+        증가
+      </button>
+      <p>{selectItems?.id}</p>
+    </>
+  );
+}
+```
+
+이미 답을 알고 있는 걸 리렌더링 할때마다 일일히 검사하면서 다시 찾을 필요 없음.
+
+한번만 계산하고 저장, 다음부터는 메모리에 저장된 값 가져와서 사용함
+
+### lazy
+
+react로 만든 앱은 기본적으로 앱이 시작 될 때 필요한 모든 자바스크립트 코드를 한 번에 로딩함
+
+이때, 특정 컴포넌트가 실제로 화면에 렌더링 되지 않더라도 코드에 임포트 되어 있고 JSX에 포함되어 있다면 
+
+해당 컴포넌트의 코드도 함께 번들에 포함되어 다운로드 됨.
+
+>앱에 포함된 컴포넌트가 많을수록 초기 번들 크기가 커지고, 결과적으로 앱의 첫 로딩 속도가 느려짐
+
+정적인 Import인 컴포넌트는 화면에 보이지 않더라도 초기 번들에 다운로드 됨
+
+>이걸 막기 위해 react는 코드 분할 기능을 제공 (React.lazy 함수 이용)
+
+```tsx
+import { lazy, useState } from "react";
+const ChildA = lazy(() => import("./components/ChildA"));
+const ChildB = lazy(() => import("./components/ChildB"));
+
+export default function App() {
+  const [isShow, setIsShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setIsShow((isShow) => !isShow)}>토글</button>
+      {isShow && (
+        <>
+          <ChildA />
+          <ChildB />
+        </>
+      )}
+    </>
+  );
+}
+```
+
+이러면 실제로 그 컴포넌트가 필요할 때 다운로드를 시작하게 됨
+
+### suspense
+
+react.lazy를 써서 컴포넌트가 필요할 때 비동기적으로 렌더링하게 되면 그제서야 데이터를 다운 받아서 일부 시간이 오래걸리는 문제 발생함.
+
+a, b 둘다 다운로드 될때까지 화면에 아무것도 안 뜨는 문제 발생(a가 먼저 다운로드 되어도)
+
+이렇게 lazy 함수를 이용해서 비동기로 로딩하는 컴포넌트에 지연이 생길 경우에 화면에 아무것도 뜨지 않는 것을 대비해서 그걸 처리할 수 있는 suspense라는 내장 컴포넌트를 제공함
+
+suspense 컴포넌트는 비동기로 로딩중일 때 보여줄 수 있는 대체 컴포넌트를 설정할 수 있게 해줌
+
+```tsx
+import { lazy, Suspense, useState } from "react";
+const ChildA = lazy(() => import("./components/ChildA"));
+const ChildB = lazy(() => import("./components/ChildB"));
+
+export default function App() {
+  const [isShow, setIsShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setIsShow((isShow) => !isShow)}>토글</button>
+      {isShow && (
+        <>
+        //fallback: 로딩될 때 나오는 대체 ui
+          <Suspense fallback={<h1>ChildA Loading..</h1>}>
+            <ChildA />
+          </Suspense>
+          <Suspense fallback={<h1>ChildB Loading..</h1>}>
+            <ChildB />
+          </Suspense>
+        </>
+      )}
+    </>
+  );
+}
+
+```
+
+나중에 스켈레톤 ui 넣을 때 이용
+
+### error-boundary
+
+렌더링 중 에러를 안전하게 처리하려면, 일부 컴포넌트에서 에러가 발생해도 앱 전체가 멈춰지지 않도록 막는 장치 필요
+
+>error boundary
+
+라이브러리 설치 후 에러 영역을 설정하고 싶은 부분을 감싸서 이용
+
+```tsx
+          <ErrorBoundary>
+            <Suspense fallback={<h1>ChildB Loading..</h1>}>
+              <ChildB />
+            </Suspense>
+          </ErrorBoundary>
+```
